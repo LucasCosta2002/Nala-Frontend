@@ -1,32 +1,32 @@
 import useApp from '../../Hooks/useApp';
-import AddDivisionModal from './AddDivisionModal';
 import { Modal, Box, Typography, Button, List, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddEmployeeModal from './AddEmployeeModal';
 import useModals from '../../Hooks/useModals';
 
-const DivisionsModal = ({}) => {
+const EmployeesModal = ({}) => {
 
-    const { divisions, setDivision, deleteDivision } = useApp();
-    const { modalDivisions, setModalDivisions, setModalDivision } = useModals();
+    const { employees, setEmployee, deleteEmployee } = useApp();
+    const { modalEmployees, setModalEmployee, setModalEmployees } = useModals();
 
-    const handleEditClick = division => {
-        setDivision(division);
-        setModalDivision(true);
+    const handleEditClick = employee => {
+        setEmployee(employee);
+        setModalEmployee(true);
     }
 
-    const handleChangeModalDivision = () => {
-        setDivision(null);
-        setModalDivision(true);
+    const handleChangeModalEmployee = () => {
+        setEmployee(null);
+        setModalEmployee(true);
     }
 
-    const handleDeleteClick = id => deleteDivision(id);
+    const handleDeleteClick = id => deleteEmployee(id);
 
-    const handleClose = () => setModalDivisions(false);
+    const handleClose = () => setModalEmployees(false);
 
     return (
-        <Modal open={modalDivisions} onClose={handleClose}>
+        <Modal open={modalEmployees} onClose={handleClose}>
             <Box
                 sx={{
                     position: 'absolute',
@@ -42,14 +42,14 @@ const DivisionsModal = ({}) => {
                     flexDirection: 'column',
                     gap: 2,
             }}>
-                <Typography variant="h6">Listado de Divisiones</Typography>
+                <Typography variant="h6">Listado de Empleados</Typography>
 
                 <Button
                     variant="contained"
                     startIcon={<AddIcon />}
-                    onClick={handleChangeModalDivision}
+                    onClick={handleChangeModalEmployee}
                     sx={{ alignSelf: 'flex-start' }}
-                >Agregar División
+                >Agregar Empleado
                 </Button>
 
                 <List
@@ -62,9 +62,9 @@ const DivisionsModal = ({}) => {
                         scrollbarColor: "#7C38CD #f1f1f1"
                     }}
                 >
-                    {divisions?.map(division => (
+                    {employees?.map(employee => (
                         <Box
-                            key={division.id}
+                            key={employee.id}
                             sx={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
@@ -75,22 +75,21 @@ const DivisionsModal = ({}) => {
                         >
                             <Box>
                                 <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                    {division.name}
+                                    {employee.name}
                                 </Typography>
                                 <Typography variant="body2" sx={{ color: '#666' }}>
-                                    {division.description}
+                                    {employee.email}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#666' }}>
+                                    {employee.country}
                                 </Typography>
                             </Box>
 
                             <Box>
-                                <IconButton
-                                    onClick={() => handleEditClick(division)}
-                                >
+                                <IconButton onClick={() => handleEditClick(employee)}>
                                     <EditIcon sx={{ color: '#7C38CD' }} />
                                 </IconButton>
-                                <IconButton
-                                    onClick={() => handleDeleteClick(division.id)}
-                                >
+                                <IconButton onClick={() => handleDeleteClick(employee.id)} >
                                     <DeleteIcon sx={{ color: '#FF6B6B' }} />
                                 </IconButton>
                             </Box>
@@ -98,10 +97,10 @@ const DivisionsModal = ({}) => {
                     ))}
                 </List>
 
-                <AddDivisionModal />
+               <AddEmployeeModal />
             </Box>
         </Modal>
     );
 };
 
-export default DivisionsModal;
+export default EmployeesModal;

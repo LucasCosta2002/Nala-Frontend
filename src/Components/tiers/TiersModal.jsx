@@ -1,32 +1,32 @@
 import useApp from '../../Hooks/useApp';
-import AddDivisionModal from './AddDivisionModal';
 import { Modal, Box, Typography, Button, List, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import useModals from '../../Hooks/useModals';
+import AddTierModal from './AddTierModal';
 
-const DivisionsModal = ({}) => {
 
-    const { divisions, setDivision, deleteDivision } = useApp();
-    const { modalDivisions, setModalDivisions, setModalDivision } = useModals();
+export default function TiersModal() {
+    const { tiers, setTier, deleteTier } = useApp();
+    const { modalTiers, setModalTiers, setModalTier } = useModals();
 
-    const handleEditClick = division => {
-        setDivision(division);
-        setModalDivision(true);
+    const handleEditClick = tier => {
+        setTier(tier);
+        setModalTier(true);
     }
 
-    const handleChangeModalDivision = () => {
-        setDivision(null);
-        setModalDivision(true);
+    const handleChangeModalTier = () => {
+        setTier(null);
+        setModalTier(true);
     }
 
-    const handleDeleteClick = id => deleteDivision(id);
+    const handleDeleteClick = id => deleteTier(id);
 
-    const handleClose = () => setModalDivisions(false);
+    const handleClose = () => setModalTiers(false);
 
     return (
-        <Modal open={modalDivisions} onClose={handleClose}>
+        <Modal open={modalTiers} onClose={handleClose}>
             <Box
                 sx={{
                     position: 'absolute',
@@ -42,14 +42,14 @@ const DivisionsModal = ({}) => {
                     flexDirection: 'column',
                     gap: 2,
             }}>
-                <Typography variant="h6">Listado de Divisiones</Typography>
+                <Typography variant="h6">Listado de Tiers</Typography>
 
                 <Button
                     variant="contained"
                     startIcon={<AddIcon />}
-                    onClick={handleChangeModalDivision}
+                    onClick={handleChangeModalTier}
                     sx={{ alignSelf: 'flex-start' }}
-                >Agregar División
+                >Agregar Tier
                 </Button>
 
                 <List
@@ -62,9 +62,9 @@ const DivisionsModal = ({}) => {
                         scrollbarColor: "#7C38CD #f1f1f1"
                     }}
                 >
-                    {divisions?.map(division => (
+                    {tiers?.map(tier => (
                         <Box
-                            key={division.id}
+                            key={tier.id}
                             sx={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
@@ -75,33 +75,20 @@ const DivisionsModal = ({}) => {
                         >
                             <Box>
                                 <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                    {division.name}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: '#666' }}>
-                                    {division.description}
+                                    {tier.name}
                                 </Typography>
                             </Box>
 
                             <Box>
-                                <IconButton
-                                    onClick={() => handleEditClick(division)}
-                                >
-                                    <EditIcon sx={{ color: '#7C38CD' }} />
-                                </IconButton>
-                                <IconButton
-                                    onClick={() => handleDeleteClick(division.id)}
-                                >
-                                    <DeleteIcon sx={{ color: '#FF6B6B' }} />
-                                </IconButton>
+                                <IconButton onClick={() => handleEditClick(tier)}><EditIcon sx={{ color: '#7C38CD' }} /></IconButton>
+                                <IconButton onClick={() => handleDeleteClick(tier.id)} ><DeleteIcon sx={{ color: '#FF6B6B' }} /> </IconButton>
                             </Box>
                         </Box>
                     ))}
                 </List>
 
-                <AddDivisionModal />
+                <AddTierModal />
             </Box>
         </Modal>
     );
-};
-
-export default DivisionsModal;
+}

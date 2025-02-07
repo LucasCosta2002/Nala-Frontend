@@ -4,30 +4,34 @@ import { toast } from 'react-toastify';
 import useApp from '../../Hooks/useApp';
 import useModals from '../../Hooks/useModals';
 
-const AddDivisionModal = ({}) => {
+const AddEmployeeModal = ({}) => {
 
-    const { addDivision, setDivision, division, updateDivision } = useApp();
-    const { modalDivision, setModalDivision } = useModals();
+    const { addEmployee, setEmployee, employee, updateEmployee } = useApp();
+    const { modalEmployee, setModalEmployee } = useModals();
 
     const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
+    const [email, setEmail] = useState('');
+    const [country, setCountry] = useState('');
 
     useEffect(() => {
-        if (division?.id) {
-            setName(division?.name);
-            setDescription(division?.description);
+        if (employee?.id) {
+            setName(employee?.name);
+            setEmail(employee?.email);
+            setCountry(employee?.country);
             return;
         }
 
         setName('');
-        setDescription('');
-    }, [division]);
+        setEmail('');
+        setCountry('');
+    }, [employee]);
 
     const handleClose = () => {
-        setDivision(null);
+        setEmployee(null);
         setName('');
-        setDescription('');
-        setModalDivision(false);
+        setEmail('');
+        setCountry('');
+        setModalEmployee(false);
     };
 
     const handleSubmit = async (e) => {
@@ -38,24 +42,35 @@ const AddDivisionModal = ({}) => {
             return;
         }
 
-        if (!description.trim()) {
-            toast.error("La descripcion es obligatoria");
+        if (!email.trim() && RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/).test(email)) {
+            toast.error("El email es obligatorio");
+            return;
+        }
+
+        if (! RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/).test(email)) {
+            toast.error("El email es invalido");
+            return;
+        }
+
+        if (!country.trim()) {
+            toast.error("El país es obligatorio");
             return;
         }
 
         try {
             let isSuccess = false;
 
-            if (division?.id) {
-                const divisionUpdate = {
-                    id: division.id,
+            if (employee?.id) {
+                const employeeUpdate = {
+                    id: employee.id,
                     name,
-                    description
+                    email,
+                    country
                 };
 
-                isSuccess = await updateDivision(divisionUpdate);
+                isSuccess = await updateEmployee(employeeUpdate);
             } else {
-                isSuccess = addDivision({name, description});
+                isSuccess = addEmployee({name, email, country});
             }
 
             if (isSuccess) handleClose();
@@ -66,7 +81,7 @@ const AddDivisionModal = ({}) => {
     };
 
     return (
-        <Modal open={modalDivision} onClose={handleClose}>
+        <Modal open={modalEmployee} onClose={handleClose}>
             <Box sx={{
                 position: 'absolute',
                 top: '50%',
@@ -82,7 +97,7 @@ const AddDivisionModal = ({}) => {
                 gap: 2,
             }}>
                 <Typography variant="h6">
-                    {division ? "Editar División" : "Agregar División"}
+                    {employee ? "Editar Empleado" : "Agregar Empleado"}
                 </Typography>
                 <form onSubmit={handleSubmit}>
                     <TextField
@@ -94,14 +109,22 @@ const AddDivisionModal = ({}) => {
                         onChange={e => setName(e.target.value)}
                     />
                     <TextField
-                        label="Descripción"
+                        label="Email"
                         variant="outlined"
                         fullWidth
-                        multiline
                         rows={3}
                         sx={{ mt: 2 }}
-                        value={description}
-                        onChange={e => setDescription(e.target.value)}
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                    />
+                    <TextField
+                        label="País"
+                        variant="outlined"
+                        fullWidth
+                        rows={3}
+                        sx={{ mt: 2 }}
+                        value={country}
+                        onChange={e => setCountry(e.target.value)}
                     />
 
                     <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
@@ -113,7 +136,7 @@ const AddDivisionModal = ({}) => {
                             Cancelar
                         </Button>
                         <Button variant="contained" type="submit">
-                            {division ? "Guardar cambios" : "Agregar"}
+                            {employee ? "Guardar cambios" : "Agregar"}
                         </Button>
                     </Stack>
                 </form>
@@ -122,4 +145,4 @@ const AddDivisionModal = ({}) => {
     );
 };
 
-export default AddDivisionModal;
+export default AddEmployeeModal;

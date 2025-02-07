@@ -2,33 +2,38 @@ import { Modal, Box, TextField, Button, Typography, Stack, Select, MenuItem, For
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import useApp from '../../Hooks/useApp';
+import useModals from '../../Hooks/useModals';
 
-const AddPositionModal = ({ open, setModalPosition }) => {
+const AddPositionModal = ({}) => {
 
-    const { tiers, divisions, addPosition, updatePosition, position, setPosition } = useApp();
+    const { tiers, divisions, addPosition, updatePosition, position, setPosition, positions } = useApp();
+    const { setModalPosition, modalPosition } = useModals();
 
     const [name, setName] = useState('');
     const [selectedTier, setSelectedTier] = useState('');
     const [selectedDivision, setSelectedDivision] = useState('');
+    const [selectedParent, setSelectedParent] = useState('');
 
-    // Prellenar los campos si estamos en modo edición
     useEffect(() => {
         if (position?.id) {
-            setName(position.name);
-            setSelectedTier(position.tierId);
-            setSelectedDivision(position.divisionId);
+            setName(position?.name);
+            setSelectedTier(position?.tierId);
+            setSelectedDivision(position?.divisionId);
+            setSelectedParent(position?.parentId);
             return;
         }
 
         setName('');
         setSelectedTier('');
         setSelectedDivision('');
+        setSelectedParent('');
     }, [position]);
 
     const handleClose = () => {
         setName('');
         setSelectedTier('');
         setSelectedDivision('');
+        setSelectedParent('');
         setPosition(null);
         setModalPosition(false);
     };
@@ -36,8 +41,18 @@ const AddPositionModal = ({ open, setModalPosition }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!name.trim() || !selectedTier || !selectedDivision) {
-            toast.error("Todos los campos son obligatorios.");
+        if (!name.trim()) {
+            toast.error("El nombre es obligatorio.");
+            return;
+        }
+
+        if (!selectedTier) {
+            toast.error("El tier es obligatorio.");
+            return;
+        }
+
+        if (!selectedDivision) {
+            toast.error("La division es obligatoria.");
             return;
         }
 
@@ -45,14 +60,15 @@ const AddPositionModal = ({ open, setModalPosition }) => {
             name,
             tierId: selectedTier,
             divisionId: selectedDivision,
+            parentId: selectedParent,
+            employeeIds: []
         };
 
         try {
             let isSuccess = false;
 
             if (position?.id) {
-                //Actualizar la posición existente
-                isSuccess = await updatePosition({ ...newPosition, id: position.id });
+                isSuccess = await updatePosition({ id: position.id, ...newPosition });
             } else {
                 isSuccess = await addPosition(newPosition);
             }
@@ -65,7 +81,7 @@ const AddPositionModal = ({ open, setModalPosition }) => {
     };
 
     return (
-        <Modal open={open} onClose={handleClose}>
+        <Modal open={modalPosition} onClose={handleClose}>
             <Box sx={{
                 position: 'absolute',
                 top: '50%',
@@ -75,7 +91,6 @@ const AddPositionModal = ({ open, setModalPosition }) => {
                 bgcolor: 'white',
                 p: 3,
                 borderRadius: 2,
-                boxShadow: 24,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 2,
@@ -100,9 +115,26 @@ const AddPositionModal = ({ open, setModalPosition }) => {
                             onChange={(e) => setSelectedTier(e.target.value)}
                             label="Tier"
                         >
-                            {tiers.map((tier) => (
+                            {tiers?.map((tier) => (
                                 <MenuItem key={tier.id} value={tier.id}>
                                     {tier.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl fullWidth sx={{ mt: 2 }}>
+                        <InputLabel>Superior</InputLabel>
+                        <Select
+                            value={selectedParent}
+                            onChange={(e) => setSelectedParent(e.target.value)}
+                            label="Superior"
+                            defaultValue={null}
+                        >
+                            <MenuItem value="0">Ninguno</MenuItem>
+                            {positions?.map( position => (
+                                <MenuItem key={position.id} value={position.id}>
+                                    {position.name}
                                 </MenuItem>
                             ))}
                         </Select>
@@ -115,7 +147,7 @@ const AddPositionModal = ({ open, setModalPosition }) => {
                             onChange={(e) => setSelectedDivision(e.target.value)}
                             label="División"
                         >
-                            {divisions.map((division) => (
+                            {divisions?.map((division) => (
                                 <MenuItem key={division.id} value={division.id}>
                                     {division.name}
                                 </MenuItem>

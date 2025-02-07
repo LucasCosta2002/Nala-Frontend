@@ -2,16 +2,18 @@ import { Modal, Box, TextField, Button, Typography, Stack, Divider } from '@mui/
 import { useEffect, useState } from 'react';
 import useApp from '../../Hooks/useApp';
 import { toast } from 'react-toastify';
+import useModals from '../../Hooks/useModals';
 
-const AddTierModal = ({ open, setModalTier }) => {
+const AddTierModal = ({ }) => {
 
     const { addTier, updateTier, tier, setTier } = useApp();
+    const { modalTier, setModalTier} = useModals();
 
     const [tierName, setTierName] = useState('');
 
     useEffect(() => {
         if (tier?.id) {
-            setTierName(tier.name)
+            setTierName(tier?.name)
             return;
         };
         setTierName('');
@@ -34,7 +36,7 @@ const AddTierModal = ({ open, setModalTier }) => {
         try {
             let isSuccess = false;
 
-            if (tier.id) {
+            if (tier?.id) {
                 isSuccess = await updateTier({id: tier.id, name: tierName});
             } else {
                 isSuccess = await addTier(tierName);
@@ -48,7 +50,7 @@ const AddTierModal = ({ open, setModalTier }) => {
     };
 
     return (
-        <Modal open={open} onClose={handleClose}>
+        <Modal open={modalTier} onClose={handleClose}>
             <Box sx={{
                 position: 'absolute',
                 top: '50%',

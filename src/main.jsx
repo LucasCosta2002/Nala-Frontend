@@ -4,6 +4,7 @@ import { AppProvider } from './Context/AppProvider.jsx'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import App from './App.jsx'
 import './index.css'
+import { ModalsProvider } from './Context/ModalsProvider.jsx';
 
 const theme = createTheme({
 	palette: {
@@ -31,9 +32,11 @@ const theme = createTheme({
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
 		<AppProvider>
-			<ThemeProvider theme={theme}>
-				<App />
-			</ThemeProvider>
+			<ModalsProvider>
+				<ThemeProvider theme={theme}>
+					<App />
+				</ThemeProvider>
+			</ModalsProvider>
 		</AppProvider>
 	</StrictMode>,
 )

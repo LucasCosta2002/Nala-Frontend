@@ -6,32 +6,32 @@ const AppContext = createContext();
 
 const AppProvider = ({ children }) => {
 
-    const [tiers, setTiers] = useState([]);
     const [tier, setTier] = useState({});
-    const [modalTier, setModalTier] = useState(false);
+    const [tiers, setTiers] = useState([]);
 
-    const [divisions, setDivisions] = useState([]);
     const [division, setDivision] = useState({});
-    const [modalDivisions, setModalDivisions] = useState(false);
-    const [modalDivision, setModalDivision] = useState(false);
+    const [divisions, setDivisions] = useState([]);
 
-    const [positions, setPositions] = useState([]);
     const [position, setPosition] = useState([]);
-    const [modalPositions, setModalPositions] = useState(false);
-    const [modalPosition, setModalPosition] = useState(false);
+    const [positions, setPositions] = useState([]);
+
+    const [employee, setEmployee] = useState([]);
+    const [employees, setEmployees] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [tiersResponse, divisionsResponse, positionsResponse] = await Promise.all([
-                    api.get('/tiers'),
-                    api.get('/divisions'),
-                    api.get('/positions'),
+                const [tiersResponse, divisionsResponse, positionsResponse, employeesResponse] = await Promise.all([
+                    api('/tiers'),
+                    api('/divisions'),
+                    api('/positions'),
+                    api('/employees'),
                 ]);
 
                 setTiers(tiersResponse.data);
                 setDivisions(divisionsResponse.data);
                 setPositions(positionsResponse.data);
+                setEmployees(employeesResponse.data);
             } catch (error) {
                 console.error("Error fetching data:", error);
                 toast.error("Error al cargar los datos. Inténtalo de nuevo.");
@@ -40,20 +40,19 @@ const AppProvider = ({ children }) => {
         fetchData();
     }, []);
 
-
     // Agregar un nuevo tier
-    const addTier = async tierForm => {
+    const addTier = async (tierForm) => {
         try {
-            // Validar si ya existe un tier con el mismo nombre
             if (tiers.some(tier => tier.name.toLowerCase() === tierForm.toLowerCase())) {
                 toast.error("Ya existe un Tier con este nombre.");
                 return false;
             }
 
-            const { data } = await api.post('/tiers', {name: tierForm});
+            const lastTier = tiers.length > 0 ? tiers[tiers.length - 1] : null;
+            const newTierY = lastTier ? lastTier.y + 700 : 100; // Espaciado fijo entre tiers
 
+            const { data } = await api.post('/tiers', { name: tierForm, y: newTierY });
             setTiers([...tiers, data]);
-
             toast.success("Tier agregado correctamente.");
             return true;
         } catch (error) {
@@ -180,15 +179,15 @@ const AppProvider = ({ children }) => {
         }
     }
 
-    // Agregar una nueva posición
     const addPosition = async position => {
         try {
             const { data } = await api.post('/positions', position);
 
-            // Actualizar el estado
-            setPositions([...positions, data]);
+            setPositions(prevPositions => {
+                const updatedPositions = [...prevPositions, data]; 
+                return updatedPositions;
+            });
 
-            // Mostrar mensaje de éxito
             toast.success("Posición agregada correctamente.");
             return true;
         } catch (error) {
@@ -198,9 +197,15 @@ const AppProvider = ({ children }) => {
     };
 
     // Actualizar una posición
-    const updatePosition = async divisionForm => {
+    const updatePosition = async positionForm => {
         try {
-            const { id, ...updatedData } = divisionForm;
+            const { id, ...updatedData } = positionForm;
+
+            // Validar que no sea su mismo superior
+            if (updatedData.parentId === id) {
+                toast.error("Una posicion no puede ser su mismo superior.");
+                return false;
+            }
 
             const { data } = await api.put(`/positions/${id}`, updatedData);
 
@@ -217,6 +222,20 @@ const AppProvider = ({ children }) => {
     // Eliminar una position
     const deletePosition = async id => {
         try {
+            // Verificar si la posición es superior de otras (tiene hijos)
+            if (positions.some(position => position.parentId?.toLowerCase() === id.toLowerCase())) {
+                toast.error("No puedes eliminar una posición que es superior a otras.");
+                return;
+            }
+
+            // Verificar si la posición tiene empleados
+            const positionToDelete = positions.find(position => position.id.toLowerCase() === id.toLowerCase());
+
+            if (positionToDelete?.employeeIds?.length > 0) {
+                toast.error("No puedes eliminar una posición que tiene empleados asignados.");
+                return;
+            }
+
             await api.delete(`/positions/${id}`);
 
             setPositions(positions.filter(position => position.id !== id));
@@ -227,6 +246,101 @@ const AppProvider = ({ children }) => {
         }
     }
 
+    // Agregar un nuevo empleado
+    const addEmployee = async employeeForm => {
+        try {
+            // Validar si ya existe un email
+            if (employees.some(employee => employee.email.toLowerCase() === employeeForm.email.toLowerCase())) {
+                toast.error("Ya existe ese email.");
+                return false;
+            }
+
+            const { data } = await api.post('/employees', employeeForm);
+
+            setEmployees([...employees, data]);
+
+            toast.success("Empleado agregado correctamente.");
+            return true;
+        } catch (error) {
+            console.error("Error adding tier:", error);
+            toast.error("Error al agregar el empleado");
+        }
+    };
+
+    // Editar un empleado
+    const updateEmployee = async employeeForm => {
+        try {
+            const {id, name, email} = employeeForm;
+
+            const employeEmail = employees.find(employee => employee.id === id);
+
+            // Verificar si el email ha cambiado
+            if (employeEmail && employeEmail.name.toLowerCase() !== name.toLowerCase()) {
+                // Validar que el nuevo email no exista en otro empleado
+                if (employees.some(employe => employe.id !== id && employe.email.toLowerCase() === email.toLowerCase())) {
+                    toast.error("Ya existe un email con ese valor.");
+                    return false;
+                }
+            }
+
+            const { data } = await api.put(`/employees/${id}`, employeeForm );
+
+            //actualizar el estado con los nuevos datos
+            setEmployees(employees.map(employeeState => employeeState.id === data.id ? data : employeeState));
+            toast.success("Empleado actualizado correctamente.");
+
+            return true;
+        } catch (error) {
+            console.error( error);
+            toast.error("Error al editar el empleado");
+        }
+    };
+
+    // Eliminar un empleado
+    const deleteEmployee = async id => {
+        try {
+            // comprobar que no sea superior de otros
+            if (positions.find(position => position.parentId && position.parentId.toLowerCase() === id.toLowerCase())) {
+                toast.error("No puedes eliminar una empleado cuando es superior de otros.");
+                return false;
+            }
+
+            await api.delete(`/employees/${id}`);
+
+            // Actualizar el estado
+            setEmployees(employees.filter(employee => employee.id !== id));
+            toast.success("Empleado eliminado correctamente.");
+        } catch (error) {
+            console.error( error);
+            toast.error("Error al eliminar el Empleado");
+        }
+    }
+
+    // asignar o eliminar un empleado de una posicion
+    const handleChangePositionEmployees = async (positionId, employeeId) => {
+        try {
+            const currentPosition = positions.find( p => p.id === positionId);
+
+            if (!currentPosition) return;
+
+            const assignedEmployeeIds = new Set(currentPosition.employeeIds ?? []);
+
+            // Si existe un employeeId en esa posicion, lo eliminamos, sino lo agregamos
+            const updatedEmployeeIds = assignedEmployeeIds.has(employeeId)
+                ? currentPosition.employeeIds.filter( id => id !== employeeId)
+                : [...currentPosition.employeeIds, employeeId];
+
+            await api.patch(`/positions/${positionId}`, { employeeIds: updatedEmployeeIds });
+
+            //Actualiza el estado previo con el nuevo
+            setPositions( prev => prev.map( p => (p.id === positionId ? { ...p, employeeIds: updatedEmployeeIds } : p)));
+            toast.success("Actualizado correctamente.");
+        } catch (error) {
+            console.error("Error actualizando empleados en la posición:", error);
+            toast.error("Error al realizar esta accion");
+        }
+    };
+
     return (
         <AppContext.Provider
             value={{
@@ -234,8 +348,6 @@ const AppProvider = ({ children }) => {
                 tiers,
                 addTier,
                 setTier,
-                modalTier,
-                setModalTier,
                 updateTier,
                 deleteTier,
                 division,
@@ -243,22 +355,22 @@ const AppProvider = ({ children }) => {
                 setDivision,
                 updateDivision,
                 deleteDivision,
-                modalDivision,
-                setModalDivision,
                 divisions,
-                modalDivisions,
-                setModalDivisions,
                 positions,
                 setPositions,
                 addPosition,
                 updatePosition,
-                modalPositions,
-                setModalPositions,
                 position,
                 setPosition,
                 deletePosition,
-                modalPosition,
-                setModalPosition,
+                employees,
+                setEmployees,
+                addEmployee,
+                updateEmployee,
+                employee,
+                setEmployee,
+                deleteEmployee,
+                handleChangePositionEmployees
             }}
         >
             {children}

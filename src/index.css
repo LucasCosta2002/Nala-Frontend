@@ -1,4 +1,10 @@
 html, body {
     padding: 0;
     margin: 0;
+    font-family: "Roboto", serif;
+}
+
+#root {
+    width: 100vw;
+    height: 100vh;
 }

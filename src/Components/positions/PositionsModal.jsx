@@ -1,14 +1,14 @@
 import useApp from '../../Hooks/useApp';
-// import AddDivisionModal from './AddDivisionModal';
 import { Modal, Box, Typography, Button, List, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AddPositionModal from './AddPositionModal';
+import useModals from '../../Hooks/useModals';
 
-const PositionsModal = ({ open, setModalPositions }) => {
+const PositionsModal = ({ }) => {
 
-    const { positions, modalPosition, setModalPosition, setPosition, deletePosition } = useApp();
+    const { positions, setPosition, deletePosition } = useApp();
+    const { modalPositions, setModalPosition, setModalPositions } = useModals();
 
     const handleEditClick = position => {
         setPosition(position);
@@ -20,12 +20,12 @@ const PositionsModal = ({ open, setModalPositions }) => {
         setModalPosition(true);
     }
 
-    const handleDeleteClick = id => deletePosition(id);
-
     const handleClose = () => setModalPositions(false);
 
+    const handleDeleteClick = id => deletePosition(id);
+
     return (
-        <Modal open={open} onClose={handleClose}>
+        <Modal open={modalPositions} onClose={handleClose}>
             <Box
                 sx={{
                     position: 'absolute',
@@ -90,10 +90,6 @@ const PositionsModal = ({ open, setModalPositions }) => {
                     ))}
                 </List>
 
-                <AddPositionModal
-                    open={modalPosition}
-                    setModalPosition={setModalPosition}
-                />
             </Box>
         </Modal>
     );
