@@ -1,8 +1,11 @@
-# React + Vite
+Pasos para arracancar el proyecto:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Backend**
+1) Moverse hasta api.   **cd ./api/**
+2) Ejecutar en la terminal. **npm install**. Los datos se almacenan en **db.json**, y se interactua con ellos mediante **JSON-Server**
+3) Lanzar el servidor con **npm run server**
 
-Currently, two official plugins are available:
+**Frontend**
+1) Moverse hasta frontend. **cd ./frontend/**
+2) Ejecutar en la termina **npm install**. Esto levantará un servidor en el puerto 5173
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
