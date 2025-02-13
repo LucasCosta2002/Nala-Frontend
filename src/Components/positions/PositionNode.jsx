@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Card, Typography, Box, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, MenuItem, Select, FormControl, InputLabel, Alert } from '@mui/material';
+import { Card, Typography, Box, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PeopleIcon from '@mui/icons-material/People';
 import AddIcon from '@mui/icons-material/Add';
@@ -7,7 +6,6 @@ import useApp from '../../Hooks/useApp';
 import PositionEmployeesModal from './PositionEmployeesModal';
 import { Handle, Position } from "@xyflow/react";
 import useModals from '../../Hooks/useModals';
-import { toast } from 'react-toastify';
 import AddChildNode from './AddChildNode';
 
 const PositionNode = ({ data }) => {

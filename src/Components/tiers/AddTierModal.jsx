@@ -4,18 +4,17 @@ import useApp from '../../Hooks/useApp';
 import { toast } from 'react-toastify';
 import useModals from '../../Hooks/useModals';
 
-const AddTierModal = ({ }) => {
-
-    const { addTier, updateTier, tier, setTier } = useApp();
-    const { modalTier, setModalTier} = useModals();
+const AddTierModal = () => {
+    const { tiers, addTier, updateTier, tier, setTier } = useApp();
+    const { modalTier, setModalTier } = useModals();
 
     const [tierName, setTierName] = useState('');
 
     useEffect(() => {
         if (tier?.id) {
-            setTierName(tier?.name)
+            setTierName(tier.name);
             return;
-        };
+        }
         setTierName('');
     }, [tier]);
 
@@ -25,11 +24,11 @@ const AddTierModal = ({ }) => {
         setModalTier(false);
     };
 
-    const handleSubmit = async e => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!tierName.trim()) {
-            toast.error("El nombre del Tier no ir estar vacío.");
+            toast.error("El nombre del Tier no puede estar vacío.");
             return;
         }
 
@@ -37,9 +36,12 @@ const AddTierModal = ({ }) => {
             let isSuccess = false;
 
             if (tier?.id) {
-                isSuccess = await updateTier({id: tier.id, name: tierName});
+                isSuccess = await updateTier({ id: tier.id, name: tierName });
             } else {
-                isSuccess = await addTier(tierName);
+                const lastTier = tiers.length > 0 ? tiers[tiers.length - 1] : null;
+                const newY = lastTier ? lastTier.y + 500 : 0;
+
+                isSuccess = await addTier({ name: tierName, y: newY });
             }
 
             if (isSuccess) handleClose();
@@ -78,7 +80,7 @@ const AddTierModal = ({ }) => {
 
                     <Stack
                         direction="row"
-                        divider={<Divider orientation="vertical" flexItem/>}
+                        divider={<Divider orientation="vertical" flexItem />}
                         sx={{ display: 'flex', justifyContent: 'space-around', mt: 2 }}
                     >
                         <Button

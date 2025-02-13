@@ -12,10 +12,10 @@ const AppProvider = ({ children }) => {
     const [division, setDivision] = useState({});
     const [divisions, setDivisions] = useState([]);
 
-    const [position, setPosition] = useState([]);
+    const [position, setPosition] = useState({});
     const [positions, setPositions] = useState([]);
 
-    const [employee, setEmployee] = useState([]);
+    const [employee, setEmployee] = useState({});
     const [employees, setEmployees] = useState([]);
 
     useEffect(() => {
@@ -43,21 +43,24 @@ const AppProvider = ({ children }) => {
     // Agregar un nuevo tier
     const addTier = async (tierForm) => {
         try {
-            if (tiers.some(tier => tier.name.toLowerCase() === tierForm.toLowerCase())) {
+            // Verificar si el nombre del tier ya existe
+            if (tiers.some(tier => tier.name.toLowerCase() === tierForm.name.toLowerCase())) {
                 toast.error("Ya existe un Tier con este nombre.");
                 return false;
             }
 
             const lastTier = tiers.length > 0 ? tiers[tiers.length - 1] : null;
-            const newTierY = lastTier ? lastTier.y + 700 : 100; // Espaciado fijo entre tiers
+            const newTierY = lastTier ? lastTier.y + 550 : 100;
 
-            const { data } = await api.post('/tiers', { name: tierForm, y: newTierY });
+            const { data } = await api.post('/tiers', { name: tierForm.name, y: newTierY });
+
             setTiers([...tiers, data]);
             toast.success("Tier agregado correctamente.");
             return true;
         } catch (error) {
-            console.error("Error adding tier:", error);
+            // console.error("Error adding tier:", error);
             toast.error("Error al agregar el Tier");
+            return false;
         }
     };
 

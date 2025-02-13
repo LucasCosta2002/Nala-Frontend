@@ -52,8 +52,22 @@ const AddPositionModal = ({}) => {
         }
 
         if (!selectedDivision) {
-            toast.error("La division es obligatoria.");
+            toast.error("La división es obligatoria.");
             return;
+        }
+
+        const selectedTierData = tiers.find(t => t.id === selectedTier);
+        let baseY = selectedTierData?.y || 100;
+
+        // Obtener todas las posiciones dentro del Tier y calcular la nueva Y
+        const tierPositions = positions
+            .filter(pos => pos.tierId === selectedTier)
+            .sort((a, b) => (a.y || baseY) - (b.y || baseY));
+
+        let newY = baseY;
+        if (tierPositions.length > 0) {
+            const lastPosition = tierPositions[tierPositions.length - 1];
+            newY = (lastPosition.y || baseY) + 100;
         }
 
         const newPosition = {
@@ -61,7 +75,8 @@ const AddPositionModal = ({}) => {
             tierId: selectedTier,
             divisionId: selectedDivision,
             parentId: selectedParent,
-            employeeIds: []
+            employeeIds: [],
+            y: newY
         };
 
         try {

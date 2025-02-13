@@ -32,22 +32,42 @@ const App = () => {
         if (tiers.length === 0 || positions.length === 0) return;
 
         const tierSpacingY = 565;
-        const nodeSpacingX = 300;
+        const nodeSpacingX = 1;
 
         const tierGroups = tiers.map((tier, index) => ({
             ...tier,
-            y: index * tierSpacingY + 1300, // Asignar altura fija por nivel
+            y: tier.y ?? index * tierSpacingY + 1300,
             positions: positions.filter(pos => pos.tierId === tier.id),
         }));
 
-        const formattedNodes = tierGroups.flatMap((tierGroup, tierIndex) => {
-            return tierGroup.positions.map((pos, posIndex) => ({
-                id: pos.id,
-                type: "position",
-                draggable: true,
-                position: { x: posIndex * nodeSpacingX + 100, y: tierGroup.y },
-                data: { label: pos.name, position: pos },
-            }));
+        const formattedNodes = [];
+        const nodeMap = new Map();
+
+        tierGroups.forEach((tierGroup) => {
+            tierGroup.positions.forEach((pos, posIndex) => {
+                const parentPos = positions.find(p => p.id === pos.parentId);
+                let calculatedX = posIndex * nodeSpacingX + 100;
+                let calculatedY = tierGroup.y + (pos.y || 0);
+
+                if (parentPos) {
+                    const parentNode = nodeMap.get(parentPos.id);
+                    if (parentNode) {
+                        calculatedX = parentNode.position.x + nodeSpacingX;
+                        calculatedY = parentNode.position.y + 500;
+                    }
+                }
+
+                const newNode = {
+                    id: pos.id,
+                    type: "position",
+                    draggable: true,
+                    position: { x: calculatedX, y: calculatedY },
+                    data: { label: pos.name, position: pos },
+                };
+
+                formattedNodes.push(newNode);
+                nodeMap.set(pos.id, newNode);
+            });
         });
 
         const containerWidth = window.innerWidth - 100;
@@ -56,7 +76,7 @@ const App = () => {
             id: `tier-${tier.id}`,
             type: "default",
             draggable: false,
-            position: { x: 0, y: index * tierSpacingY + 80 }, 
+            position: { x: 0, y: tier.y ?? index * tierSpacingY + 80 },
             data: { label: tier.name, width: containerWidth },
             style: {
                 width: "100%",
@@ -69,12 +89,12 @@ const App = () => {
                 flexDirection: "column",
                 justifyContent: "flex-start",
                 alignItems: "center",
+                fontSize: "20px",
                 padding: "20px 30px",
                 textAlign: "center"
             }
         }));
 
-        // Crear edges de relación padre-hijo
         const formattedEdges = positions
             .filter(pos => pos.parentId)
             .map(pos => ({
